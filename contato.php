@@ -1,3 +1,26 @@
+<?php
+session_start();
+require 'includes/conexao.php';
+
+$feedback = "";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $assunto = trim($_POST['assunto'] ?? '');
+    $texto   = trim($_POST['texto'] ?? '');
+
+    if (!empty($assunto) && !empty($texto)) {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO mensagem_contato (assunto, mensagem) VALUES (?, ?)");
+            $stmt->execute([$assunto, $texto]);
+            $feedback = "<div style='background-color: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 18px; text-align: center; font-weight: bold;'>Mensagem enviada com sucesso! Agradecemos o seu contato.</div>";
+        } catch (Exception $e) {
+            $feedback = "<div style='background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 18px; text-align: center;'>Erro ao enviar mensagem: " . $e->getMessage() . "</div>";
+        }
+    } else {
+        $feedback = "<div style='background-color: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 18px; text-align: center;'>Por favor, preencha todos os campos.</div>";
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -12,7 +35,10 @@
     <main>
         <div class="form-container">
             <h2>Deixe sua mensagem</h2>
-            <form action="#" method="POST">
+            
+            <?php if (!empty($feedback)) echo $feedback; ?>
+
+            <form action="contato.php" method="POST">
                 <label for="assunto">Assunto</label>
                 <input type="text" id="assunto" name="assunto" placeholder="Ex: Elogio, Dúvida, Reclamação" required>
                 

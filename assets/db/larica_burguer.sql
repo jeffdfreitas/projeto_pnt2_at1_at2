@@ -175,3 +175,12 @@ UPDATE usuario
 SET senha = '$2y$10$wT.4jZ9V0fX5U1qJ8h2n8e9Z7x6c5v4b3n2m1a0s9d8f7g6h5j4k2' 
 WHERE email = 'admin@laricaburger.com';
 
+CREATE TABLE mensagem_contato (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    assunto VARCHAR(50) NOT NULL,
+    mensagem TEXT NOT NULL,
+    lida INT DEFAULT 0,
+    data_envio TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+

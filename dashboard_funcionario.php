@@ -41,6 +41,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['ac
     }
 }
 
+// PROCESSAR MARCAÇÃO DE MENSAGEM COMO LIDA
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['acao']) && $_POST['acao'] === 'marcar_lida') {
+    $id_msg = (int) $_POST['id_mensagem'];
+    try {
+        $stmtMsg = $pdo->prepare("UPDATE mensagem_contato SET lida = 1 WHERE id = ?");
+        $stmtMsg->execute([$id_msg]);
+        $mensagem = "<div class='alerta-ok'>Mensagem #{$id_msg} marcada como lida!</div>";
+    } catch (Exception $e) {
+        $mensagem = "<div class='alerta-erro'>Erro ao atualizar mensagem: " . $e->getMessage() . "</div>";
+    }
+}
+
+// Consulta todas as mensagens de contato (não lidas primeiro, depois mais recentes)
+$mensagens_contato = $pdo->query("
+    SELECT id, assunto, mensagem, lida, data_envio
+    FROM mensagem_contato
+    ORDER BY lida ASC, data_envio DESC
+")->fetchAll(PDO::FETCH_ASSOC);
+
+
 // Consulta todos os pedidos do banco (mais recentes primeiro)
 $pedidos = $pdo->query("
     SELECT p.id, p.data_pedido, p.status_pedido, p.valor_total, c.nome AS cliente_nome, fp.nome AS forma_pagamento
@@ -269,8 +289,59 @@ foreach ($pedidos as $i => $ped) {
                 <?php endif; ?>
             </tbody>
         </table>
-    </main>
 
+
+    <hr style="border: 0; border-top: 2px solid #f3f4f6; margin: 40px 0 25px 0;">
+    <h3 style="margin-bottom: 15px;">Mensagens Recebidas (Elogios, Sugestões e Reclamações)</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Data / Hora</th>
+                    <th>Assunto</th>
+                    <th>Mensagem</th>
+                    <th>Status</th>
+                    <th>Ação</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($mensagens_contato)): ?>
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: #6b7280; padding: 20px;">
+                            Nenhuma mensagem enviada pelos visitantes até o momento.
+                        </td>
+                    </tr>
+                <?php else: ?>
+                    <?php foreach ($mensagens_contato as $msg): ?>
+                        <tr style="<?php echo ($msg['lida'] == 0) ? 'background-color: #fffbeb;' : ''; ?>">
+                            <td><?php echo date('d/m/Y H:i', strtotime($msg['data_envio'])); ?></td>
+                            <td><strong><?php echo htmlspecialchars($msg['assunto']); ?></strong></td>
+                            <td style="max-width: 400px;"><?php echo nl2br(htmlspecialchars($msg['mensagem'])); ?></td>
+                            <td>
+                                <?php if ($msg['lida'] == 0): ?>
+                                    <span class="status-badge status-pendente">Nova</span>
+                                <?php else: ?>
+                                    <span class="status-badge status-entregue">Lida</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($msg['lida'] == 0): ?>
+                                    <form action="dashboard_funcionario.php" method="POST" style="margin: 0;">
+                                        <input type="hidden" name="acao" value="marcar_lida">
+                                        <input type="hidden" name="id_mensagem" value="<?php echo $msg['id']; ?>">
+                                        <button type="submit" class="btn-salvar-status">Marcar como lida</button>
+                                    </form>
+                                <?php else: ?>
+                                    <span style="color: #6b7280; font-size: 0.85rem;">Concluída</span>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </main>
+                        
+    
     <footer class="footer">
         <p><strong>Atendimento de Terça a Domingo, das 18h às 23h30.</strong></p>
         <p><strong>Endereço:</strong> Av. Rio Branco, 193 - Bairro do Recife (Recife Antigo)</p>
