@@ -130,15 +130,24 @@ foreach ($produtos as $prod) {
                             
                             <div class="card-footer">
                                 <span class="price">R$ <?php echo number_format($item['preco_venda'], 2, ',', '.'); ?></span>
-                                
-                                <!-- Formulário preparado para enviar o item ao carrinho -->
-                                <form action="carrinho.php" method="POST" class="form-add-carrinho">
-                                    <input type="hidden" name="acao" value="adicionar">
-                                    <input type="hidden" name="id_produto" value="<?php echo $item['id']; ?>">
-                                    <input type="number" name="quantidade" value="1" min="1" max="20" class="input-qtd" title="Quantidade">
-                                    <button type="submit" class="btn-buy" style="width: auto; padding: 8px 14px;">Adicionar</button>
-                                </form>
+
+                                <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_tipo'] == 1): ?>
+                                    <!-- CLIENTE LOGADO: Pode escolher quantidade e adicionar -->
+                                    <form action="carrinho.php" method="POST" class="form-add-carrinho">
+                                        <input type="hidden" name="acao" value="adicionar">
+                                        <input type="hidden" name="id_produto" value="<?php echo $item['id']; ?>">
+                                        <input type="number" name="quantidade" value="1" min="1" max="20" class="input-qtd" title="Quantidade">
+                                        <button type="submit" class="btn-buy" style="width: auto; padding: 8px 14px;">Adicionar</button>
+                                    </form>
+
+                                <?php else: ?>
+                                    <!-- VISITANTE: Direciona para o login -->
+                                    <a href="login.php" class="btn-buy" style="text-decoration: none; padding: 8px 14px;">
+                                        Pedir agora
+                                    </a>
+                                <?php endif; ?>
                             </div>
+
                         </div>
                     <?php endforeach; ?>
                 </div>

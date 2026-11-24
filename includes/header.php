@@ -21,12 +21,12 @@ if (isset($_SESSION['carrinho']) && is_array($_SESSION['carrinho'])) {
                 Olá, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!
             </span>
             <a href="logout.php" class="btn-login" style="background-color: #dc2626; color: #fff;">Sair</a>
-
-        <?php else: ?>
+        
+        <?php else: ?>  <!-- LEMBRETE: usuario_tipo 1 = cliente; usuario_tipo 2 = funcionario -->
             <!-- MENU PARA CLIENTES LOGADOS E VISITANTES -->
             <a href="index.php">Início</a>
             
-            <?php if (isset($_SESSION['usuario_id'])): ?>
+            <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_tipo'] == 1): ?>
                 <a href="dashboard_cliente.php">Dashboard</a>
             <?php endif; ?>
 
@@ -34,19 +34,22 @@ if (isset($_SESSION['carrinho']) && is_array($_SESSION['carrinho'])) {
             <a href="sobre.php">Sobre Nós</a>
             <a href="contato.php">Contatos</a>
 
-            <a href="carrinho.php" style="font-weight: bold;">
-                Carrinho (<?php echo $qtd_carrinho; ?>)
-            </a>
-
-            <?php if (isset($_SESSION['usuario_id'])): ?>
+            <?php if (isset($_SESSION['usuario_id']) && $_SESSION['usuario_tipo'] == 1): ?>
+                <!-- CARRINHO VISÍVEL APENAS PARA CLIENTE LOGADO -->
+                <a href="carrinho.php" style="font-weight: bold;">
+                    Carrinho (<?php echo $qtd_carrinho; ?>)
+                </a>
                 <span style="font-weight: bold; margin-left: 15px;">
                     Olá, <?php echo htmlspecialchars($_SESSION['usuario_nome']); ?>!
                 </span>
                 <a href="logout.php" class="btn-login" style="background-color: #dc2626; color: #fff;">Sair</a>
             <?php else: ?>
+                <!-- VISITANTE NÃO LOGADO -->
                 <a href="login.php" class="btn-login">Login</a>
             <?php endif; ?>
+
         <?php endif; ?>
 
     </nav>
+
 </header>

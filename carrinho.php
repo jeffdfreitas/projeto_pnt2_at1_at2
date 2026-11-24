@@ -2,7 +2,13 @@
 session_start();
 require 'includes/conexao.php';
 
-// Inicializa o array do carrinho na sessão caso ainda não exista
+// TRAVA DE SEGURANÇA: Somente cliente logado pode acessar o carrinho (tipo=1: cliente;) 
+if (!isset($_SESSION['usuario_id']) || $_SESSION['usuario_tipo'] != 1) {
+    header("Location: login.php");
+    exit;
+}
+
+// Inicialização do array carrinho para os produtos, caso não tivesse usuário logado.
 if (!isset($_SESSION['carrinho'])) {
     $_SESSION['carrinho'] = [];
 }
